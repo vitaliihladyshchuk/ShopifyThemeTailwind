@@ -1,0 +1,45 @@
+<!-- Випадаюча мінікорзина -->
+  <div 
+    x-show="open" 
+    @click.away="open = false"
+    x-transition
+    class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded shadow-lg z-50"
+  >
+    <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+      <span class="font-semibold text-lg">Ваш кошик</span>
+      <button @click="open = false" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    {% if cart.item_count > 0 %}
+      <ul class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+        {% for item in cart.items %}
+          <li class="flex items-center py-3">
+            <img src="{{ item.image | img_url: 'small' }}" alt="{{ item.title }}" class="w-12 h-12 object-cover rounded mr-3">
+            <div class="flex-1">
+              <div class="font-medium">{{ item.product.title }}</div>
+              <div class="text-sm text-gray-500">{{ item.variant.title }}</div>
+              <div class="text-sm text-gray-700">К-сть: {{ item.quantity }}</div>
+            </div>
+            <div class="ml-2 font-semibold">{{ item.line_price | money }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="p-4 border-t border-gray-100">
+        <div class="flex justify-between font-semibold">
+          <span>Всього:</span>
+          <span>{{ cart.total_price | money }}</span>
+        </div>
+        <a href="/cart" class="block mt-4 w-full text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+          Перейти до кошика
+        </a>
+      </div>
+    {% else %}
+      <div class="p-4 text-center text-gray-500">
+        Ваш кошик порожній.
+      </div>
+    {% endif %}
+  </div>
+</div>

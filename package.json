@@ -1,8 +1,8 @@
 {
-  "name": "ShopifyThemeTailwind",
+  "name": "shopify_test_theme",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "If you wish to use this repository instead, then feel free to use the following ```sh shopify theme init [ NAME OF YOUR THEME ] --clone-url https://github.com/vitaliihladyshchuk/ShopifyThemeTailwind ```",
+  "main": "postcss.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,16 +13,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/vitaliihladyshchuk/ShopifyThemeTailwind/issues"
   },
   "homepage": "https://github.com/vitaliihladyshchuk/ShopifyThemeTailwind#readme",
   "devDependencies": {
-    "autoprefixer": "^10.4.4",
-    "postcss": "^8.4.12",
-    "tailwindcss": "^4.1.8"
-  },
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.8"
+    "tailwindcss": "^3.4.17"
   }
 }
