@@ -1,45 +1,134 @@
-<!-- Випадаюча мінікорзина -->
+<script>
+  window.initialCart = {{ cart | json }};
+</script>
+
+<!-- Drawer -->
+<div 
+>
+  <!-- Overlay -->
   <div 
-    x-show="open" 
-    @click.away="open = false"
-    x-transition
-    class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded shadow-lg z-50"
+    x-show="openDrawer"
+    x-transition.opacity
+    @click="openDrawer = false"
+    class="fixed inset-0 bg-black/50"
+  ></div>
+
+  <!-- Cart Drawer -->
+  <div 
+    x-show="openDrawer"
+    x-transition:enter="transition transform ease-out duration-300"
+    x-transition:enter-start="translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transition transform ease-in duration-300"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="translate-x-full"
+    class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl p-6 overflow-auto"
+    @click.away="openDrawer = false"
   >
-    <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-      <span class="font-semibold text-lg">Ваш кошик</span>
-      <button @click="open = false" class="text-gray-400 hover:text-gray-600">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold">Your cart</h2>
+      <button @click="openDrawer = false" class="text-gray-600 hover:text-black">
+        {% render 'icon-close' %}
       </button>
     </div>
-    {% if cart.item_count > 0 %}
-      <ul class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
-        {% for item in cart.items %}
-          <li class="flex items-center py-3">
-            <img src="{{ item.image | img_url: 'small' }}" alt="{{ item.title }}" class="w-12 h-12 object-cover rounded mr-3">
-            <div class="flex-1">
-              <div class="font-medium">{{ item.product.title }}</div>
-              <div class="text-sm text-gray-500">{{ item.variant.title }}</div>
-              <div class="text-sm text-gray-700">К-сть: {{ item.quantity }}</div>
+
+    <template x-if="cartItems.length === 0">
+      <div class="p-6 text-center text-gray-500">Your cart is empty</div>
+    </template>
+
+    <template x-if="cartItems.length > 0">
+      <ul class="divide-y divide-gray-200">
+        <template x-for="(item, index) in cartItems" :key="item.key">
+          <li class="flex px-4 py-4 space-x-4">
+            <div class="w-16 h-16 bg-gray-100 flex-shrink-0">
+              <img :src="getImageUrl(item.image)" :alt="item.product_title" class="w-full h-full object-cover">
             </div>
-            <div class="ml-2 font-semibold">{{ item.line_price | money }}</div>
+            <div class="flex-1">
+              <h3 class="text-sm font-medium text-gray-900" x-text="item.product_title"></h3>
+              <p class="text-sm text-gray-500" x-show="item.variant_title !== 'Default Title'" x-text="item.variant_title"></p>
+              <p class="text-sm text-gray-900 mt-1" x-text="`${item.quantity} × ${formatMoney(item.line_price)}`"></p>
+            </div>
+            <button @click="removeFromCart(item.key)" class="text-gray-400 hover:text-red-500">
+              {% render 'icon-close' %}
+            </button>
           </li>
-        {% endfor %}
+        </template>
       </ul>
-      <div class="p-4 border-t border-gray-100">
-        <div class="flex justify-between font-semibold">
-          <span>Всього:</span>
-          <span>{{ cart.total_price | money }}</span>
-        </div>
-        <a href="/cart" class="block mt-4 w-full text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-          Перейти до кошика
+    </template>
+
+    <div class="px-4 py-4 border-t mt-4" x-show="cartItems.length > 0">
+      <div class="flex justify-between text-base font-medium text-gray-900">
+        <p>Total</p>
+        <p x-text="formatMoney(totalPrice)"></p>
+      </div>
+      <div class="mt-4 space-y-2">
+        <form method="post" action="{{ routes.checkout_url }}">
+          <button
+            type="submit"
+            class="w-full inline-flex justify-center items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            Checkout
+          </button>
+        </form>
+        <a href="{{ routes.cart_url }}" class="w-full inline-flex justify-center items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+          View cart
         </a>
       </div>
-    {% else %}
-      <div class="p-4 text-center text-gray-500">
-        Ваш кошик порожній.
-      </div>
-    {% endif %}
+    </div>
   </div>
 </div>
+
+<script>
+function cartDrawer() {
+  return {
+    openDrawer: false,
+    cartItems: [],
+    totalPrice: 0,
+    cartItemsCount: '',
+
+    initCart() {
+      this.cartItems = window.initialCart.items || [];
+      this.totalPrice = window.initialCart.total_price || 0;
+      this.cartItemsCount = window.initialCart.item_count || 0;
+
+      window.addEventListener('cart-updated', () => {
+        this.refreshCart();
+      });
+    },
+
+    refreshCart() {
+      fetch('/cart.js')
+        .then(res => res.json())
+        .then(data => {
+          debugger;
+          this.cartItemsCount = data.item_count;
+          this.cartItems = data.items;
+          this.totalPrice = data.total_price;
+        });
+    },
+
+    getImageUrl(img) {
+      return img ? `${img.replace(/(\.[a-z]+)$/, '_100x100$1')}` : '';
+    },
+
+    formatMoney(cents) {
+      return (cents / 100).toFixed(2) + ' {{ cart.currency.symbol }}';
+    },
+
+    removeFromCart(itemKey) {
+      fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: itemKey, quantity: 0 })
+      })
+      .then(res => res.json())
+      .then(data => {
+        this.cartItems = data.items;
+        this.totalPrice = data.total_price;
+        window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+      });
+    }
+  }
+}
+</script>
+

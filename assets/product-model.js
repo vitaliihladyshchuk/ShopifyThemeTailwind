@@ -49,6 +49,8 @@ class ProductModel extends HTMLElement {
             modal.querySelector("#body > model-viewer").setAttribute("reveal", "auto");
         });
     }
+
+    
 }
 
 const productModel = customElements.define('product-model', ProductModel);
