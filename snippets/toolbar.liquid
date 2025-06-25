@@ -1,0 +1,153 @@
+{%- comment -%}
+  Tailwind CSS & Alpine.js adaptation of all native filter types + show more + clear filters
+{%- endcomment -%}
+
+<div 
+  x-data="facetsHandler()"
+  x-init="init()"
+  class="bg-white p-4 rounded shadow space-y-6"
+>
+  <!-- Mobile filter toggle -->
+  <div class="md:hidden flex justify-between items-center">
+    <button @click="mobileOpen = true" class="flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-300 px-3 py-2 rounded">
+      {% render 'icon-filter' %}
+      <span>Filter</span>
+    </button>
+    <button @click="clearAllFilters" class="text-sm text-blue-600 hover:underline">Clear</button>
+  </div>
+
+  <!-- Mobile modal filters -->
+  <div x-show="mobileOpen" x-transition class="fixed inset-0 z-50 bg-white overflow-y-auto p-4" @keydown.escape.window="mobileOpen = false">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold">Filter</h2>
+      <button @click="mobileOpen = false" class="text-gray-600">✕</button>
+    </div>
+    <form @change.debounce.500ms="submitFilters($event)" class="space-y-4">
+      {% for filter in collection.filters %}
+        <div class="space-y-2">
+          <h3 class="text-sm font-semibold text-gray-700">{{ filter.label }}</h3>
+          {% case filter.type %}
+            {% when 'list' %}
+              <div class="flex flex-col gap-2">
+                {% assign visible_values = filter.values | slice: 0, 5 %}
+                {% assign hidden_values = filter.values | slice: 5 %}
+
+                {% for value in visible_values %}
+                  <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" name="{{ filter.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} class="text-blue-600 border-gray-300 rounded">
+                    <span>{{ value.label }} ({{ value.count }})</span>
+                  </label>
+                {% endfor %}
+
+
+                <template x-if="expandedFilters.includes('{{ filter.param_name }}')">
+                  <div class="flex flex-col gap-2">
+                    {% for value in hidden_values %}
+                      <label class="flex items-center gap-2 text-sm text-gray-600">
+                        <input type="checkbox" name="{{ filter.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} class="text-blue-600 border-gray-300 rounded">
+                        <span>{{ value.label }} ({{ value.count }})</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </template>
+              </div>
+
+            {% when 'price_range' %}
+              <div class="flex gap-2">
+                <input name="{{ filter.min_value.param_name }}" type="number" min="0" placeholder="Min" value="{{ filter.min_value.value }}" class="w-24 border border-gray-300 rounded px-2 py-1">
+                <input name="{{ filter.max_value.param_name }}" type="number" min="0" placeholder="Max" value="{{ filter.max_value.value }}" class="w-24 border border-gray-300 rounded px-2 py-1">
+              </div>
+
+            {% when 'boolean' %}
+              <label class="flex items-center gap-2 text-sm text-gray-600">
+                <input type="checkbox" name="{{ filter.param_name }}" value="1" {% if filter.true_value.active %}checked{% endif %} class="text-blue-600 border-gray-300 rounded">
+                <span>{{ filter.label }}</span>
+              </label>
+
+            {% when 'color' %}
+              <div class="flex flex-wrap gap-2">
+                {% for value in filter.values %}
+                  <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" name="{{ filter.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} class="text-blue-600 border-gray-300 rounded">
+                    <span class="flex items-center gap-1">
+                      <span class="w-4 h-4 rounded-full border" style="background-color: {{ value.value | downcase }};"></span>
+                      <span>{{ value.label }}</span>
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+          {% endcase %}
+        </div>
+      {% endfor %}
+      <button type="reset" @click.prevent="clearAllFilters" class="text-sm text-blue-600 hover:underline mt-4">Clear</button>
+    </form>
+  </div>
+
+  <!-- Desktop Sidebar Filters -->
+<!-- Desktop Sidebar Filters -->
+<div class="hidden md:block">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-semibold">Filter</h2>
+    <button @click="clearAllFilters" class="text-sm text-blue-600 hover:underline">
+      Clear
+    </button>
+  </div>
+  <form @change.debounce.500ms="submitFilters($event)" class="space-y-4">
+    {% for filter in collection.filters %}
+      {% render 'filter-group', filter: filter %}
+    {% endfor %}
+    <div class="mt-4">
+      <button
+        type="reset"
+        class="text-red-600 hover:underline focus:outline-none"
+        @click="$el.closest('form').reset(); $dispatch('filters-reset')"
+      >
+        Очистити всі фільтри
+      </button>
+    </div>
+  </form>
+</div>
+
+</div>
+
+<script>
+function facetsHandler() {
+  return {
+    url: null,
+    mobileOpen: false,
+    expandedFilters: [],
+
+    init() {
+      this.url = new URL(window.location.href);
+    },
+
+    async submitFilters(event) {
+      const form = event.target.closest('form');
+      const formData = new FormData(form);
+      const searchParams = new URLSearchParams(formData).toString();
+
+      const sectionIdEl = document.querySelector('[data-section-id]');
+      if (!sectionIdEl) return;
+      const sectionId = sectionIdEl.dataset.sectionId;
+
+      const url = `${window.location.pathname}?section_id=${sectionId}&${searchParams}`;
+      const response = await fetch(url);
+      const text = await response.text();
+      const html = new DOMParser().parseFromString(text, 'text/html');
+
+      document.getElementById('ProductGridContainer').innerHTML =
+        html.getElementById('ProductGridContainer').innerHTML;
+
+      history.pushState({}, '', `${window.location.pathname}?${searchParams}`);
+    },
+
+    clearAllFilters() {
+      const form = document.querySelector('form');
+      if (!form) return;
+
+      form.reset();
+      this.submitFilters({ target: form });
+    }
+  }
+}
+</script>

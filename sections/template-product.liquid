@@ -127,6 +127,8 @@
                                     <button 
                                         type="submit" 
                                         class="w-full px-6 py-4 bg-gray-900 text-white hover:bg-gray-700 rounded-sm my-2"
+                            
+                                        data-ajax-cart-request-button
                                         :disabled="loading || !{{ selected_variant.available | json }}"
                                     >
                                         <template x-if="!loading">
@@ -291,7 +293,7 @@ function productForm() {
             const form = event.target.closest('form');
             const formData = new FormData(form);
 
-            fetch('/cart/add.js', {
+            fetch('{{ routes.cart_add_url }}', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

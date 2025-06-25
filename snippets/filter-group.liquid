@@ -1,0 +1,73 @@
+<div class="space-y-2" x-data="{ showAll: false }">
+  <h3 class="text-sm font-semibold text-gray-700 mb-1">{{ filter.label }}</h3>
+
+  {% case filter.type %}
+    {% when 'list' or 'color' %}
+      <div>
+        <div class="flex flex-col gap-2 max-h-[calc(5*2.5rem)] overflow-hidden transition-all duration-300" :class="showAll ? 'max-h-full' : ''">
+          {% for value in filter.values %}
+            <label class="flex items-center space-x-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                name="{{ filter.param_name }}"
+                value="{{ value.value }}"
+                {% if value.active %}checked{% endif %}
+                class="text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              >
+              {% if filter.type == 'color' %}
+                <span class="flex items-center gap-1">
+                  <span class="w-4 h-4 rounded-full border" style="background-color: {{ value.value | downcase }};"></span>
+                  <span>{{ value.label }}</span>
+                </span>
+              {% else %}
+                <span>{{ value.label }} ({{ value.count }})</span>
+              {% endif %}
+            </label>
+          {% endfor %}
+        </div>
+
+        {% if filter.values.size > 5 %}
+          <button
+            type="button"
+            @click="showAll = !showAll"
+            class="mt-1 text-sm text-blue-600 hover:underline focus:outline-none"
+            x-text="showAll ? 'Показати менше' : 'Показати більше'"
+          ></button>
+        {% endif %}
+      </div>
+
+    {% when 'price_range' %}
+      <div class="flex gap-2">
+        <input
+          name="{{ filter.min_value.param_name }}"
+          type="number"
+          min="0"
+          placeholder="Min"
+          value="{{ filter.min_value.value }}"
+          class="w-24 border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500"
+          aria-label="Мінімальна ціна"
+        >
+        <input
+          name="{{ filter.max_value.param_name }}"
+          type="number"
+          min="0"
+          placeholder="Max"
+          value="{{ filter.max_value.value }}"
+          class="w-24 border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500"
+          aria-label="Максимальна ціна"
+        >
+      </div>
+
+    {% when 'boolean' %}
+      <label class="inline-flex items-center space-x-2 text-sm text-gray-600">
+        <input
+          type="checkbox"
+          name="{{ filter.param_name }}"
+          value="1"
+          {% if filter.true_value.active %}checked{% endif %}
+          class="text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+        >
+        <span>{{ filter.label }}</span>
+      </label>
+  {% endcase %}
+</div>

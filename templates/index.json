@@ -5,7 +5,24 @@
             "settings": {
                 "featured_collection": "all"
             }
-        }
+        },
+        "feature-blog": {
+            "type": "feature-blog",
+            "settings": {
+                "blog_handle": "blog",
+                "show_excerpt": true,
+                "show_image": true,
+                "show_date": true,
+                "show_author": true
+            }
+        },
+        "image-and-text": {
+            "type": "image-and-text",
+            "settings": {
+                "image": "",
+                "text": "This is an example of an image and text section."
+            }
+        },
     },
-    "order": ["featured-collection"]
+    "order": ["featured-collection", "feature-blog", "image-and-text"],
 }
