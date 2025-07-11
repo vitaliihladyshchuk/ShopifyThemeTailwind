@@ -13,14 +13,16 @@ endif
 -%}
 
 <div
-  id="FacetsToolbarContainer"
+    id="FacetsToolbarContainer"
+  x-data="facetsToolbar()"
   class="w-full bg-white rounded shadow p-4"
 >
   <form
-    id="FacetFiltersForm"
+     id="FacetFiltersForm"
+    x-ref="facetForm"
     class="space-y-4"
-    onsubmit="event.preventDefault(); onFacetsSubmit();"
-    onchange="onFacetsSubmit();"
+    @submit.prevent="submitFacets()"
+    @change="submitFacets()"
   >
     {%- if results.terms -%}
       <input type="hidden" name="q" value="{{ results.terms | escape }}">
@@ -140,7 +142,7 @@ endif
                   <input
                     type="number"
                     name="filter.v.price.gte"
-                    value="{{ filter.min_value.value | divided_by: 100 }}"
+                    value="{% if filter.min_value.value %}{{ filter.min_value.value | divided_by: 100 }}{% endif %}"
                     min="0"
                     class="form-input w-20 border rounded px-2 py-1"
                     placeholder="Min"
@@ -149,7 +151,7 @@ endif
                   <input
                     type="number"
                     name="filter.v.price.lte"
-                    value="{{ filter.max_value.value | divided_by: 100 }}"
+                    value="{% if filter.max_value.value %}{{ filter.max_value.value | divided_by: 100 }}{% endif %}"
                     min="0"
                     class="form-input w-20 border rounded px-2 py-1"
                     placeholder="Max"
@@ -202,7 +204,6 @@ endif
   name="sort_by"
   id="SortBy"
   class="form-select border rounded px-2 py-1"
-  onchange="onFacetsSubmit();"
 >
   {% for option in results.sort_options %}
     {% assign option_string = option | join: '||' %}
@@ -226,34 +227,36 @@ endif
 </div>
 
 <script>
-function onFacetsSubmit() {
-  const form = document.querySelector('#FacetFiltersForm');
-  const formData = new FormData(form);
+window.facetsToolbar = function facetsToolbar() {
+  return {
+    loading: false,
+    submitFacets(event) {
+      if (event) event.preventDefault();
+      this.loading = true;
+      const form = this.$refs.facetForm;
+      const formData = new FormData(form);
+      const params = new URLSearchParams(formData);
 
-  const params = new URLSearchParams(formData).toString();
-  const url = window.location.pathname + (params ? '?' + params : '');
+      // Витягуємо section_id з DOM (з data-section-id на гріді)
+      const sectionId = document.querySelector('#ProductGridContainer')?.dataset.sectionId;
+      if (sectionId) params.set('section_id', sectionId);
 
-  fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-    .then(res => res.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      const url = window.location.pathname + '?' + params.toString();
 
-      // Оновлення фільтрів
-      const newToolbar = doc.querySelector('#FacetsToolbarContainer');
-      const oldToolbar = document.querySelector('#FacetsToolbarContainer');
-      if (newToolbar && oldToolbar && oldToolbar.parentNode) {
-        oldToolbar.parentNode.replaceChild(newToolbar, oldToolbar);
-      }
-
-      // Оновлення товарів
-      const newGrid = doc.querySelector('#ProductGridContainer');
-      const oldGrid = document.querySelector('#ProductGridContainer');
-      if (newGrid && oldGrid) {
-        oldGrid.innerHTML = newGrid.innerHTML;
-      }
-    });
+      fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+          // Замінюємо весь контейнер секції
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newContainer = doc.querySelector('#CollectionAjaxContainer');
+          const oldContainer = document.querySelector('#CollectionAjaxContainer');
+          if (newContainer && oldContainer && oldContainer.parentNode) {
+            oldContainer.parentNode.replaceChild(newContainer, oldContainer);
+          }
+        })
+        .finally(() => this.loading = false);
+    }
+  }
 }
-
-
 </script>
