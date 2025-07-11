@@ -8,14 +8,14 @@
   <link rel="canonical" href="{{ canonical_url }}">
   <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
   {{ content_for_header }} <!-- Header hook for plugins -->
-  {% comment %} {{ 'theme.css' | asset_url | stylesheet_tag }} {% endcomment %}
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
   {{ 'application.css' | asset_url | stylesheet_tag }}
 
   <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   
   <script src="{{ 'application.js' | asset_url }}" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+  <script src="//unpkg.com/alpinejs" defer></script>
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
@@ -30,5 +30,7 @@
   <main role="main">
     {{ content_for_layout }}
   </main>
+
+  {% section 'footer' %}
 </body>
 </html>

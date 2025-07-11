@@ -1,28 +1,35 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
-    "sections": {
-        "featured-collection": {
-            "type": "featured-collection",
-            "settings": {
-                "featured_collection": "all"
-            }
-        },
-        "feature-blog": {
-            "type": "feature-blog",
-            "settings": {
-                "blog_handle": "blog",
-                "show_excerpt": true,
-                "show_image": true,
-                "show_date": true,
-                "show_author": true
-            }
-        },
-        "image-and-text": {
-            "type": "image-and-text",
-            "settings": {
-                "image": "",
-                "text": "This is an example of an image and text section."
-            }
-        },
+  "sections": {
+    "featured-collection": {
+      "type": "featured-collection",
+      "settings": {
+        "featured_collection": "all"
+      }
     },
-    "order": ["featured-collection", "feature-blog", "image-and-text"],
+    "feature-blog": {
+      "type": "feature-blog",
+      "settings": {}
+    },
+    "image-and-text": {
+      "type": "image-and-text",
+      "settings": {
+        "image": "",
+        "text": "This is an example of an image and text section."
+      }
+    }
+  },
+  "order": [
+    "featured-collection",
+    "feature-blog",
+    "image-and-text"
+  ]
 }
