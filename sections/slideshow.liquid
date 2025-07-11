@@ -22,7 +22,8 @@
               {% if block.settings.image != blank %}
                 <img src="{{ block.settings.image | img_url: 'large' }}" alt="{{ block.settings.title | escape }}" class="mb-4 w-full max-h-96 object-contain">
               {% endif %}
-              {% if block.settings.title != blank %}
+              <div class="absolute bottom-0 left-0 p-4 bg-white bg-opacity-90 rounded-b">
+                {% if block.settings.title != blank %}
                 <h3 class="text-xl font-bold mb-2">{{ block.settings.title }}</h3>
               {% endif %}
               {% if block.settings.text != blank %}
@@ -33,6 +34,7 @@
                   {{ block.settings.button_label }}
                 </a>
               {% endif %}
+              </div>
             </div>
           </div>
         {% endfor %}
