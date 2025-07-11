@@ -1,23 +1,60 @@
 <div class="w-full py-6 px-3">
-    <div class="border bg-white shadow-lg rounded-lg overflow-hidden">
-        <a href="{{ product_product.url }}">
-            {% if product_product.featured_image %}
-                <div class="h-80 overflow-hidden">
-                    <img class="w-full h-full object-cover transition duration-1000 ease-in-out hover:scale-105 transform" src="{{ product_product.featured_image | img_url: 'medium' }}" alt="{{ product_product.featured_image.alt }}">
-                </div>
-                
-            {% else %}
-                {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover bg-gray-100' }}
-            {% endif %}
-        </a>
-        
-        <div class="flex flex-col p-4">
-            <span class="text-sm text-gray-400">{{ product_product.vendor }}</span>
-
-            <a href="{{ product_product.url }}" class="text-gray-700 uppercase font-medium">{{ product_product.title }}</a>
-
-            <p class="text-gray-500">{{ product_product.price | money }}</p>
+  <div class="border bg-white shadow-lg rounded-lg overflow-hidden">
+    <a href="{{ product_product.url }}">
+      {% if product_product.featured_image %}
+        <div class="h-80 overflow-hidden">
+          <img class="w-full h-full object-cover transition duration-1000 ease-in-out hover:scale-105 transform" src="{{ product_product.featured_image | img_url: 'medium' }}" alt="{{ product_product.featured_image.alt }}">
         </div>
-        
+      {% else %}
+        {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover bg-gray-100' }}
+      {% endif %}
+    </a>
+
+    <div class="flex flex-col p-4">
+      <span class="text-sm text-gray-400">{{ product_product.vendor }}</span>
+      <a href="{{ product_product.url }}" class="text-gray-700 uppercase font-medium">{{ product_product.title }}</a>
+      <p class="text-gray-500">{{ product_product.price | money }}</p>
+
+      <div 
+        x-data="{
+          loading: false,
+          added: false,
+          error: false,
+          async addToCart(variantId) {
+            this.loading = true;
+            this.error = false;
+            try {
+              const res = await fetch('/cart/add.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ id: variantId, quantity: 1 })
+              });
+              if (!res.ok) throw new Error();
+              this.added = true;
+               // Оновлення кошика: (за бажанням, приклад з лічильником)
+               window.dispatchEvent(new CustomEvent('cart-updated'));
+              setTimeout(() => { this.added = false; }, 1200);
+            } catch {
+              this.error = true;
+              setTimeout(() => { this.error = false; }, 1200);
+            } finally {
+              this.loading = false;
+            }
+          }
+        }"
+      >
+        {% if product_product.available %}
+          <button
+            type="button"
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full transition disabled:opacity-60"
+            :disabled="loading || added"
+            @click="addToCart({{ product_product.variants.first.id }})"
+            x-text="loading ? 'Додається...' : (added ? 'Added!' : (error ? 'Error!' : 'Add to Cart'))"
+          >Add to cart</button>
+        {% else %}
+          <span class="mt-4 text-red-500 font-semibold">Out of stock</span>
+        {% endif %}
+      </div>
     </div>
+  </div>
 </div>

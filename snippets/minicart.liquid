@@ -100,7 +100,6 @@ function cartDrawer() {
       fetch('/cart.js')
         .then(res => res.json())
         .then(data => {
-          debugger;
           this.cartItemsCount = data.item_count;
           this.cartItems = data.items;
           this.totalPrice = data.total_price;
