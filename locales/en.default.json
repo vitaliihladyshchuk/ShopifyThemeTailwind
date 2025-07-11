@@ -3,6 +3,28 @@
     "404": {
       "title": "Not found",
       "subtext_html": "The page you were looking for does not exist"
+    },
+    "search": {
+      "search": "Search",
+      "reset": "Clear search term",
+      "show_results":"Show results"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "of",
+      "next": "Next",
+      "previous": "Previous",
+      "first": "First",
+      "last": "Last",
+      "goto_page": "Go to page",
+      "page_number": {
+        "one": "{{ page }} of {{ count }} page",
+        "other": "{{ page }} of {{ count }} pages"
+      },
+      "page_number_simple": {
+        "one": "{{ count }} page",
+        "other": "{{ count }} pages"
+      }
     }
   },
    "products": {
@@ -145,5 +167,18 @@
       "suggestions": "Suggestions",
       "pages": "Pages"
     },
+  },
+  "accessibility": {
+    "skip_to_text": "Skip to content",
+    "skip_to_product_info": "Skip to product information",
+    "close": "Close",
+    "unit_price_separator": "per",
+    "vendor": "Vendor:",
+    "error": "Error",
+    "refresh_page": "Choosing a selection results in a full page refresh.",
+    "link_messages": {
+      "new_window": "Opens in a new window.",
+      "external": "Opens external website."
+    }
   }
 }

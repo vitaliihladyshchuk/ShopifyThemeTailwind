@@ -1,19 +1,96 @@
 {% if pagination.pages > 1 %}
-    <nav role="navigation" class="flex justify-center items-center my-8">
-        {% if pagination.previous %}
-            <a href="{{ pagination.previous.url }}" class="border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-8 py-3 mx-1 rounded-sm font-medium">Previous</a>
-        {% endif %}
+  <nav
+    role="navigation"
+    aria-label="Pagination"
+    class="flex justify-center items-center my-8"
+    x-data="{ loading: false }"
+  >
+    {% if pagination.previous %}
+      <a
+        href="{{ pagination.previous.url }}"
+        class="pagination-link border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-4 py-2 mx-1 rounded transition-colors duration-150 font-medium flex items-center"
+        :class="{ 'pointer-events-none opacity-50': loading }"
+        @click.prevent="loading = true"
+        aria-label="Previous page"
+      >
+        &larr; {{ 'general.pagination.previous' | t }}
+      </a>
+    {% endif %}
 
-        {%  for part in pagination.part %}
-            {% if part.is_link %}
-                <a href="{{ part.url }}" class="border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-8 py-3 mx-1 rounded-sm font-medium">{{ part.title }}</a>
-            {% else %}
-                <span class="border border-gray-600 text-gray-600 px-8 py-3 mx-1 rounded-sm font-medium">{{ part.title }}</span>
-            {% endif %}
-        {% endfor %}
+    {% for part in pagination.parts %}
+      {% if part.is_link %}
+        <a
+          href="{{ part.url }}"
+          class="pagination-link border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-4 py-2 mx-1 rounded transition-colors duration-150 font-medium"
+          :class="{ 'pointer-events-none opacity-50': loading }"
+          @click.prevent="loading = true"
+          aria-label="{{ 'general.pagination.goto_page' | t: page: part.title }}"
+        >
+          {{ part.title }}
+        </a>
+      {% elsif part.title == '...' %}
+        <span class="px-2 text-gray-400 select-none">…</span>
+      {% else %}
+        <span
+          class="border border-blue-600 bg-blue-600 text-white px-4 py-2 mx-1 rounded font-medium"
+          aria-current="page"
+        >
+          {{ part.title }}
+        </span>
+      {% endif %}
+    {% endfor %}
 
-        {% if pagination.next %}
-            <a href="{{ pagination.next.url }}" class="border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-8 py-3 mx-1 rounded-sm font-medium">Next</a>
-        {% endif %}
-    </nav>
+    {% if pagination.next %}
+      <a
+        href="{{ pagination.next.url }}"
+        class="pagination-link border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white px-4 py-2 mx-1 rounded transition-colors duration-150 font-medium flex items-center"
+        :class="{ 'pointer-events-none opacity-50': loading }"
+        @click.prevent="loading = true"
+        aria-label="Next page"
+      >
+        {{ 'general.pagination.next' | t }} &rarr;
+      </a>
+    {% endif %}
+  </nav>
 {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.addEventListener('click', function(e) {
+    const link = e.target.closest('.pagination-link');
+    if (link) {
+      e.preventDefault();
+      // Знайти Alpine-інстанс і поставити loading=true
+      if (link.closest('[x-data]') && window.Alpine) {
+        window.Alpine.$data(link.closest('[x-data]')).loading = true;
+      }
+      fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          // Замінити grid товарів
+          const newGrid = doc.querySelector('#ProductGridContainer');
+          const oldGrid = document.querySelector('#ProductGridContainer');
+          if (newGrid && oldGrid) {
+            oldGrid.innerHTML = newGrid.innerHTML;
+          }
+          // Замінити пагінацію
+          const newPagination = doc.querySelector('nav[role="navigation"]');
+          const oldPagination = document.querySelector('nav[role="navigation"]');
+          if (newPagination && oldPagination) {
+            oldPagination.innerHTML = newPagination.innerHTML;
+          }
+          // Прокрутити до grid (опціонально)
+          if (oldGrid) oldGrid.scrollIntoView({ behavior: 'smooth' });
+        })
+        .finally(() => {
+          // Вимкнути loading-стан
+          if (link.closest('[x-data]') && window.Alpine) {
+            window.Alpine.$data(link.closest('[x-data]')).loading = false;
+          }
+        });
+    }
+  });
+});
+</script>
