@@ -1,28 +1,58 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
-    "sections": {
-        "featured-collection": {
-            "type": "featured-collection",
-            "settings": {
-                "featured_collection": "all"
-            }
-        },
-        "feature-blog": {
-            "type": "feature-blog",
-            "settings": {
-                "blog_handle": "blog",
-                "show_excerpt": true,
-                "show_image": true,
-                "show_date": true,
-                "show_author": true
-            }
-        },
-        "image-and-text": {
-            "type": "image-and-text",
-            "settings": {
-                "image": "",
-                "text": "This is an example of an image and text section."
-            }
-        },
+  "sections": {
+    "featured-collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Featured Collection",
+        "featured_collection": "all",
+        "number_of_products_to_show": 4
+      }
     },
-    "order": ["featured-collection", "feature-blog", "image-and-text"],
+    "feature-blog": {
+      "type": "feature-blog",
+      "settings": {
+        "slides_desktop": 3,
+        "slides_mobile": 1,
+        "blog": ""
+      }
+    },
+    "image-and-text": {
+      "type": "image-and-text",
+      "settings": {
+        "image": "shopify://shop_images/wood-leather-watches.jpg",
+        "heading": "Your heading here",
+        "text": "This is an example of an image and text section.",
+        "link": "",
+        "link_text": "Learn more",
+        "image_position": "left"
+      }
+    },
+    "image_and_text_fLtPYM": {
+      "type": "image-and-text",
+      "name": "Image and Text",
+      "settings": {
+        "image": "shopify://shop_images/classic-quartz-wrist-watch.jpg",
+        "heading": "Your heading here",
+        "text": "Your text here",
+        "link": "",
+        "link_text": "Learn more",
+        "image_position": "right"
+      }
+    }
+  },
+  "order": [
+    "featured-collection",
+    "feature-blog",
+    "image-and-text",
+    "image_and_text_fLtPYM"
+  ]
 }
