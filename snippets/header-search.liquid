@@ -115,7 +115,14 @@
             <template x-for="product in results.products" :key="product.id">
               <li>
                 <a :href="product.url" class="flex items-center gap-3 hover:bg-gray-50 rounded p-2 transition group">
-                  <img :src="product.featured_image.url + '&width=80'" :alt="product.title" class="w-14 h-14 object-cover rounded border" loading="lazy">
+                  <img
+                    :src="product.featured_image.url + '&width=80'"
+                    :alt="product.title"
+                    class="w-14 h-14 object-cover rounded border"
+                    width="80"
+                    height="80"
+                    loading="lazy"
+                  />
                   <div>
                     <div class="font-medium text-gray-900 group-hover:text-blue-700" x-text="product.title"></div>
                     <div class="text-xs text-gray-500 mt-1" x-text="Number(product.price).toFixed(2) + ' {{ cart.currency.symbol }}'"></div>

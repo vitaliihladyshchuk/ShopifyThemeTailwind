@@ -12,8 +12,16 @@
                         {% for order in customer.orders %}
                             <div class="relative">
                                 <div class="w-full min-80 bg-gray-200 rounded-md overflow-hidden lg:h-80">
+                                    {% assign image = order.line_items.first.image %}
                                     {% if order.line_items.first.image %}
-                                        <img class="w-full h-full object-center object-cover" src="{{ order.line_items.first.image | img_url: 'medium' }}" alt="{{ order.line_items.first.image.alt }}">
+                                        <img
+                                        class="w-full h-full object-center object-cover"
+                                        src="{{ image | image_url: width: 400 }}"
+                                        alt="{{ image.alt | escape }}"
+                                        width="{{ image.width }}"
+                                        height="{{ image.height }}"
+                                        >
+
                                     {% else %}
                                         {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-center object-cover' }}
                                     {% endif %}
