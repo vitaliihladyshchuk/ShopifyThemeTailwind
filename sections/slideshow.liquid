@@ -20,7 +20,15 @@
           <div class="swiper-slide">
             <div class="flex flex-col items-center justify-center h-64 bg-white rounded shadow p-6">
               {% if block.settings.image != blank %}
-                <img src="{{ block.settings.image | img_url: 'large' }}" alt="{{ block.settings.title | escape }}" class="mb-4 w-full max-h-96 object-contain">
+               {% assign image = block.settings.image %}
+
+                <img
+                  src="{{ image | image_url: width: 800 }}"
+                  alt="{{ block.settings.title | escape }}"
+                  width="{{ image.width }}"
+                  height="{{ image.height }}"
+                  class="mb-4 w-full max-h-96 object-contain"
+                />
               {% endif %}
               <div class="absolute bottom-0 left-0 p-4 bg-white bg-opacity-90 rounded-b">
                 {% if block.settings.title != blank %}
