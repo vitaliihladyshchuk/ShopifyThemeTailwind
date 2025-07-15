@@ -9,15 +9,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
   {{ content_for_header }} <!-- Header hook for plugins -->
   {{ 'theme.css' | asset_url | stylesheet_tag }}
+
   {{ 'application.css' | asset_url | stylesheet_tag }}
 
-  <!-- Swiper CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  {{ 'swiper-bundle.min.css' | asset_url | stylesheet_tag }}
+
   
   <script src="{{ 'application.js' | asset_url }}" defer></script>
-  <script src="//unpkg.com/alpinejs" defer></script>
-  <!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="{{ 'alpinejs@3_14_9.js' | asset_url }}" defer></script>
+  <script src="{{ 'swiper-bundle.min.js' | asset_url }}" defer></script>
 
   <style>
     [x-cloak] { display: none !important; }
