@@ -58,47 +58,49 @@
 document.addEventListener('DOMContentLoaded', function() {
   document.body.addEventListener('click', function(e) {
     const link = e.target.closest('.pagination-link');
-    if (link) {
-      e.preventDefault();
+    if (!link) return;
 
-      const alpineRoot = link.closest('[x-data]');
-      if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
-        alpineRoot.__x.$data.loading = true;
-      }
+    e.preventDefault();
 
-      fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-
-          // Оновлюємо блок з товарами
-          const newGrid = doc.querySelector('#ProductGridContainer');
-          const oldGrid = document.querySelector('#ProductGridContainer');
-          if (newGrid && oldGrid) {
-            oldGrid.innerHTML = newGrid.innerHTML;
-          }
-
-          // Оновлюємо пагінацію
-          const newPagination = doc.querySelector('nav[role="navigation"]');
-          const oldPagination = document.querySelector('nav[role="navigation"]');
-          if (newPagination && oldPagination) {
-            oldPagination.innerHTML = newPagination.innerHTML;
-          }
-
-          // Прокручуємо до блоку товарів
-          if (oldGrid) oldGrid.scrollIntoView({ behavior: 'smooth' });
-        })
-        .catch(() => {
-          // Тут можна додати обробку помилок
-          console.error('Помилка завантаження сторінки пагінації');
-        })
-        .finally(() => {
-          if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
-            alpineRoot.__x.$data.loading = false;
-          }
-        });
+    const alpineRoot = link.closest('[x-data]');
+    if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+      alpineRoot.__x.$data.loading = true;
     }
+
+    fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const newGrid = doc.querySelector('#ProductGridContainer');
+        const oldGrid = document.querySelector('#ProductGridContainer');
+        if (newGrid && oldGrid) {
+          oldGrid.replaceWith(newGrid);
+        }
+
+        const newPagination = doc.querySelector('nav[role="navigation"]');
+        const oldPagination = document.querySelector('nav[role="navigation"]');
+        if (newPagination && oldPagination) {
+          oldPagination.replaceWith(newPagination);
+        }
+
+        window.history.pushState({}, '', link.href);
+
+        document.querySelector('#ProductGridContainer')?.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(() => {
+        console.error('Помилка завантаження сторінки пагінації');
+      })
+      .finally(() => {
+        if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+          alpineRoot.__x.$data.loading = false;
+        }
+      });
+  });
+
+  window.addEventListener('popstate', () => {
+    location.reload();
   });
 });
 </script>

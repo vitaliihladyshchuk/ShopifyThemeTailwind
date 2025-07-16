@@ -81,12 +81,11 @@
           %}
         </aside>
 
-        <div class="flex-1">
+        <div class="flex-1" id="ProductGridContainer">
           <template x-if="view === 'grid'">
             <div
               class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
               data-section-id="{{ section.id }}"
-              id="ProductGridContainer"
             >
               {% for product in collection.products %}
                 {% render 'product-card', product_product: product %}
@@ -99,7 +98,7 @@
           </template>
 
           <template x-if="view === 'list'">
-            <div class="flex flex-col space-y-6" id="ProductListContainer">
+            <div class="flex flex-col space-y-6">
               {% for product in collection.products %}
                 <div class="border p-4 bg-white rounded shadow-sm flex items-center space-x-4">
                   {% render 'product-card', product_product: product, list_view: true %}

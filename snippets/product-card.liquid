@@ -31,28 +31,36 @@
           added: false,
           error: false,
           async addToCart(variantId) {
-            this.loading = true;
-            this.error = false;
-            try {
-              const res = await fetch('/cart/add.js', {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json' 
-                },
-                body: JSON.stringify({ id: variantId, quantity: 1 })
-              });
-              if (!res.ok) throw new Error('Add to cart failed');
-              this.added = true;
-              window.dispatchEvent(new CustomEvent('cart-updated'));
-              setTimeout(() => { this.added = false; }, 1200);
-            } catch (e) {
-              this.error = true;
-              setTimeout(() => { this.error = false; }, 1200);
-            } finally {
-              this.loading = false;
-            }
-          }
+  this.loading = true;
+  this.error = false;
+  try {
+    const res = await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ id: variantId, quantity: 1 })
+    });
+
+    if (!res.ok) throw new Error('Add to cart failed');
+
+    // отримуємо новий стан корзини
+    const cartRes = await fetch('/cart.js');
+    const cartData = await cartRes.json();
+
+    this.added = true;
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: cartData }));
+
+    setTimeout(() => { this.added = false; }, 1200);
+  } catch (e) {
+    this.error = true;
+    setTimeout(() => { this.error = false; }, 1200);
+  } finally {
+    this.loading = false;
+  }
+}
+
         }"
       >
         {% if product_product.available %}

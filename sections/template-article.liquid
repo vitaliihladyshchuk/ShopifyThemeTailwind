@@ -36,8 +36,9 @@
               class="w-full h-80 md:h-96 object-cover object-center"
               width="{{ article.image.width }}"
               height="{{ article.image.height }}"
-              src="{{ article.image | image_url: 'large' }}"
+              src="{{ article.image | image_url: 'master' | image_url }}"
               alt="{{ article.image.alt | escape }}"
+              loading="lazy"
             >
           {% else %}
             {% assign placeholder_image = 'lifestyle-1' %}
