@@ -9,6 +9,7 @@
             {% if article.image %}
               <a href="{{ article.url }}" class="block">
                 {% assign image = article.image %}
+            
                 <img
                   src="{{ image | image_url: width: 400 }}"
                   alt="{{ image.alt | escape }}"
@@ -74,3 +75,31 @@
     </div>
   {% endpaginate %}
 </div>
+{% schema %}
+{
+  "name": "Blog posts",
+  "tag": "section",
+  "class": "shopify-section",
+  "settings": [
+    {
+      "type": "number",
+      "id": "number_of_blog_posts",
+      "label": "Number of posts per page",
+      "default": 6
+    },
+    {
+      "type": "text",
+      "id": "blog_read_more",
+      "label": "Read more text",
+      "default": "Read more"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog posts grid",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}
+
