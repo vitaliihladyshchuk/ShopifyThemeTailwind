@@ -7,6 +7,15 @@
   {% render 'loading-spinner' %}
 {% endcomment %}
 
-<div class="{% if class %}{{ class }}{% else %}loading__spinner hidden{% endif %}">
-  {{ 'loading-spinner.svg' | inline_asset_content }}
+<div 
+  x-data="{ loading: false }" 
+  x-show="loading" 
+  x-transition
+  class="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50"
+  style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
+>
+  <div class="animate-spin w-12 h-12 text-gray-700">
+    {{ 'loading-spinner.svg' | inline_asset_content }}
+  </div>
 </div>
+

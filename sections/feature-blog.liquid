@@ -1,102 +1,71 @@
-
 {% assign blog_handle = section.settings.blog %}
 {% assign posts_limit = section.settings.posts_limit %}
 {% assign slides_desktop = section.settings.slides_desktop %}
 {% assign slides_mobile = section.settings.slides_mobile %}
 {% assign blog = blogs[blog_handle] %}
-{% assign article_count = blog.articles.size | at_most: posts_limit %}
-{% if article_count > slides_desktop %}
-  {% assign enable_loop = true %}
-{% else %}
-  {% assign enable_loop = false %}
-{% endif %}
 
+{% if blog != nil %}
+  {% assign article_count = blog.articles.size | at_most: posts_limit %}
+  {% if article_count > slides_desktop %}
+    {% assign enable_loop = true %}
+  {% else %}
+    {% assign enable_loop = false %}
+  {% endif %}
 
-{% if blog.articles.size > 0 %}
-  <div class="feature-blog-section py-8 bg-gray-50">
-    <div class="swiper-{{ section.id }} feature-blog-swiper" x-data x-init="
-      new Swiper($el, {
-        slidesPerView: window.innerWidth >= 768 ? {{ slides_desktop }} : {{ slides_mobile }},
-       loop: {{ enable_loop | json }},
-        spaceBetween: 16,
-        loop: false,
-        navigation: {
-          nextEl: $el.querySelector('.swiper-button-next'),
-          prevEl: $el.querySelector('.swiper-button-prev'),
-        },
-        pagination: {
-          el: $el.querySelector('.swiper-pagination'),
-          clickable: true,
-        },
-        breakpoints: {
-          640: {
-            slidesPerView: {{ slides_mobile }},
+  {% if blog.articles.size > 0 %}
+    <div class="feature-blog-section py-8 bg-gray-50">
+      <div class="swiper-{{ section.id }} feature-blog-swiper" x-data x-init="
+        new Swiper($el, {
+          loop: {{ enable_loop | json }},
+          spaceBetween: 16,
+          navigation: {
+            nextEl: $el.querySelector('.swiper-button-next'),
+            prevEl: $el.querySelector('.swiper-button-prev'),
           },
-          1024: {
-            slidesPerView: {{ slides_desktop }},
+          pagination: {
+            el: $el.querySelector('.swiper-pagination'),
+            clickable: true,
+          },
+          breakpoints: {
+            640: {
+              slidesPerView: {{ slides_mobile }},
+            },
+            1024: {
+              slidesPerView: {{ slides_desktop }},
+            }
           }
-        }
-      });
-    ">
-      <div class="swiper-wrapper">
-        {% for article in blog.articles limit: posts_limit %}
-          <div class="swiper-slide px-2">
-            <a href="{{ article.url }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-              {% if article.image %}
-                <img
-                  src="{{ article.image | image_url: 'small' }}"
-                  alt="{{ article.title | escape }}"
-                  class="w-full h-48 object-cover"
-                  width="{{ article.image.width }}"
-                  height="{{ article.image.height }}"
->
-              {% endif %}
-              <div class="p-4">
-                <h3 class="text-lg font-semibold mb-2">{{ article.title }}</h3>
-                {% if article.excerpt %}
-                  <p class="text-gray-600 text-sm mb-2">{{ article.excerpt | strip_html | truncate: 80 }}</p>
+        });
+      ">
+        <div class="swiper-wrapper">
+          {% for article in blog.articles limit: posts_limit %}
+            <div class="swiper-slide px-2">
+              <a href="{{ article.url }}" class="block bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+                {% if article.image %}
+                  <img
+                    src="{{ article.image | image_url: 'small' }}"
+                    alt="{{ article.title | escape }}"
+                    class="w-full h-48 object-cover"
+                    width="{{ article.image.width }}"
+                    height="{{ article.image.height }}"
+                  >
                 {% endif %}
-                <span class="text-xs text-gray-400">{{ article.published_at | date: "%d.%m.%Y" }}</span>
-              </div>
-            </a>
-          </div>
-        {% endfor %}
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold mb-2">{{ article.title }}</h3>
+                  {% if article.excerpt %}
+                    <p class="text-gray-600 text-sm mb-2">{{ article.excerpt | strip_html | truncate: 80 }}</p>
+                  {% endif %}
+                  <span class="text-xs text-gray-400">{{ article.published_at | date: "%d.%m.%Y" }}</span>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Navigation & Pagination -->
+        <div class="swiper-button-prev text-gray-700"></div>
+        <div class="swiper-button-next text-gray-700"></div>
+        <div class="swiper-pagination mt-4"></div>
       </div>
-
-      <!-- Navigation & Pagination -->
-      <div class="swiper-button-prev text-gray-700"></div>
-      <div class="swiper-button-next text-gray-700"></div>
-      <div class="swiper-pagination mt-4"></div>
     </div>
-  </div>
+  {% endif %}
 {% endif %}
-
-{% schema %}
-{
-    "name": "Feature Blog",
-    "settings": [
-        {
-            "type": "number",
-            "id": "slides_desktop",
-            "label": "Кількість слайдів на десктопі",
-            "default": 3
-        },
-        {
-            "type": "number",
-            "id": "slides_mobile",
-            "label": "Кількість слайдів на мобільних",
-            "default": 1
-        },
-        {
-            "type": "blog",
-            "id": "blog",
-            "label": "Блог",
-        },
-        {
-            "type": "number",
-            "id": "posts_limit",
-            "label": "Кількість постів",
-        }
-    ]
-}
-{% endschema %}

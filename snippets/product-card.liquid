@@ -4,16 +4,14 @@
       {% if product_product.featured_image %}
         <div class="h-80 overflow-hidden">
           {% assign image = product_product.featured_image %}
-          {% if image %}
-            <img
-              class="w-full h-full object-cover transition duration-1000 ease-in-out hover:scale-105 transform"
-              src="{{ image | image_url: width: 400 }}"
-              alt="{{ image.alt | escape }}"
-              width="{{ image.width }}"
-              height="{{ image.height }}"
-            >
-          {% endif %}
-
+          <img
+            class="w-full h-full object-cover transition duration-1000 ease-in-out hover:scale-105 transform"
+            src="{{ image | image_url: width: 400 }}"
+            alt="{{ image.alt | escape }}"
+            width="{{ image.width }}"
+            height="{{ image.height }}"
+            loading="lazy"
+          >
         </div>
       {% else %}
         {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover bg-gray-100' }}
@@ -22,8 +20,10 @@
 
     <div class="flex flex-col p-4">
       <span class="text-sm text-gray-400">{{ product_product.vendor }}</span>
-      <a href="{{ product_product.url }}" class="text-gray-700 uppercase font-medium">{{ product_product.title }}</a>
-      <p class="text-gray-500">{{ product_product.price | money }}</p>
+      <a href="{{ product_product.url }}" class="text-gray-700 uppercase font-medium mt-1 hover:text-blue-600 transition-colors duration-200">
+        {{ product_product.title }}
+      </a>
+      <p class="text-gray-500 mt-1">{{ product_product.price | money }}</p>
 
       <div 
         x-data="{
@@ -36,15 +36,17 @@
             try {
               const res = await fetch('/cart/add.js', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json', 
+                  'Accept': 'application/json' 
+                },
                 body: JSON.stringify({ id: variantId, quantity: 1 })
               });
-              if (!res.ok) throw new Error();
+              if (!res.ok) throw new Error('Add to cart failed');
               this.added = true;
-               // Оновлення кошика: (за бажанням, приклад з лічильником)
-               window.dispatchEvent(new CustomEvent('cart-updated'));
+              window.dispatchEvent(new CustomEvent('cart-updated'));
               setTimeout(() => { this.added = false; }, 1200);
-            } catch {
+            } catch (e) {
               this.error = true;
               setTimeout(() => { this.error = false; }, 1200);
             } finally {
@@ -59,10 +61,12 @@
             class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full transition disabled:opacity-60"
             :disabled="loading || added"
             @click="addToCart({{ product_product.variants.first.id }})"
-            x-text="loading ? 'Додається...' : (added ? 'Added!' : (error ? 'Error!' : 'Add to Cart'))"
-          >Add to cart</button>
+            x-text="loading ? 'Додається...' : (added ? 'Додано!' : (error ? 'Помилка!' : 'Додати в кошик'))"
+          >
+            Додати в кошик
+          </button>
         {% else %}
-          <span class="mt-4 text-red-500 font-semibold">Out of stock</span>
+          <span class="mt-4 text-red-500 font-semibold">Немає в наявності</span>
         {% endif %}
       </div>
     </div>

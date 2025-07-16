@@ -7,7 +7,6 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */
- [
 {
   "current": {
     "cart_type": "drawer_and_page",
@@ -24,7 +23,7 @@
   },
   "presets": {
     "Default": {}
-  },
+  }
 }
- ]
+
 

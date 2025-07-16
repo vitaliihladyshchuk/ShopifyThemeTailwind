@@ -1,49 +1,51 @@
 {% case media.media_type %}
-    {% when 'image' %}
-        {% assign image = media.preview_image %}
-        {% if image %}
-        <img
-            src="{{ image | image_url: width: 800 }}"
-            alt="{{ image.alt | escape }}"
-            width="{{ image.width }}"
-            height="{{ image.height }}"
-            class="w-full h-full object-cover"
+  {% when 'image' %}
+    {% assign image = media.preview_image %}
+    {% if image %}
+      <img
+        src="{{ image | image_url: width: 800 }}"
+        alt="{{ image.alt | escape }}"
+        width="{{ image.width }}"
+        height="{{ image.height }}"
+        class="w-full h-auto object-cover max-h-96 md:max-h-[480px]"
+      >
+    {% endif %}
+
+  {% when 'external_video' %}
+    {{ media | external_video_tag: class: 'w-full h-48 md:h-80 object-cover' }}
+
+  {% when 'video' %}
+    {{ media | video_tag: controls: true, class: 'w-full h-48 md:h-full object-cover' }}
+
+  {% when 'model' %}
+    <product-model data-media-id="{{ media.id }}">
+      <div>
+        <button 
+          id="productModelOpenButton_{{ media.id }}" 
+          x-on:click="productModalOpen = true" 
+          class="w-full h-48 md:h-80 bg-gray-100 border relative"
         >
-        {% endif %}
-    
-    {% when 'external_video' %}
-        {{ media | external_video_tag: class: 'w-full h-80 object-cover' }}
+          <span class="border bg-gray-100 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            {% render 'icon-model-viewer' %}
+          </span>
+          {% assign image = media.preview_image %}
+          {% if image %}
+            <img
+              src="{{ image | image_url: width: 800 }}"
+              alt="{{ image.alt | escape }}"
+              width="{{ image.width }}"
+              height="{{ image.height }}"
+              class="w-full h-full object-cover"
+            >
+          {% endif %}
+        </button>
+      </div>
 
-    {% when 'video' %}
-        {{ media | video_tag: controls: true, class: 'w-full h-full object-cover' }}
+      <template>
+        {{ media | model_viewer_tag: reveal: 'interaction' }}
+      </template>
+    </product-model>
 
-    {% when 'model' %}
-        <product-model data-media-id="{{ media.id }}">
-            <div>
-                <button id="productModelOpenButton_{{ media.id }}" x-on:click="productModalOpen = true" class="w-full h-full bg-gray-100 border relative">
-                    <span class="border bg-gray-100 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        {% render 'icon-model-viewer' %}
-                    </span>
-                    {% assign image = media.preview_image %}
-                    {% if image %}
-                    <img
-                        src="{{ image | image_url: width: 800 }}"
-                        alt="{{ image.alt | escape }}"
-                        width="{{ image.width }}"
-                        height="{{ image.height }}"
-                        class="w-full h-full object-cover"
-                    >
-                    {% endif %}
-
-                </button>
-            </div>
-
-            <template>
-                {{ media | model_viewer_tag: reveal: 'interaction' }}
-            </template>
-        </product-model>
-
-    {% else %}
-        {{ media | media_tag }}
-        
+  {% else %}
+    {{ media | media_tag }}
 {% endcase %}

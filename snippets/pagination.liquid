@@ -60,34 +60,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const link = e.target.closest('.pagination-link');
     if (link) {
       e.preventDefault();
-      // Знайти Alpine-інстанс і поставити loading=true
-      if (link.closest('[x-data]') && window.Alpine) {
-        window.Alpine.$data(link.closest('[x-data]')).loading = true;
+
+      const alpineRoot = link.closest('[x-data]');
+      if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+        alpineRoot.__x.$data.loading = true;
       }
+
       fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.text())
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          // Замінити grid товарів
+
+          // Оновлюємо блок з товарами
           const newGrid = doc.querySelector('#ProductGridContainer');
           const oldGrid = document.querySelector('#ProductGridContainer');
           if (newGrid && oldGrid) {
             oldGrid.innerHTML = newGrid.innerHTML;
           }
-          // Замінити пагінацію
+
+          // Оновлюємо пагінацію
           const newPagination = doc.querySelector('nav[role="navigation"]');
           const oldPagination = document.querySelector('nav[role="navigation"]');
           if (newPagination && oldPagination) {
             oldPagination.innerHTML = newPagination.innerHTML;
           }
-          // Прокрутити до grid (опціонально)
+
+          // Прокручуємо до блоку товарів
           if (oldGrid) oldGrid.scrollIntoView({ behavior: 'smooth' });
         })
+        .catch(() => {
+          // Тут можна додати обробку помилок
+          console.error('Помилка завантаження сторінки пагінації');
+        })
         .finally(() => {
-          // Вимкнути loading-стан
-          if (link.closest('[x-data]') && window.Alpine) {
-            window.Alpine.$data(link.closest('[x-data]')).loading = false;
+          if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+            alpineRoot.__x.$data.loading = false;
           }
         });
     }

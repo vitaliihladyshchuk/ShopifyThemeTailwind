@@ -1,76 +1,76 @@
-<div class="py-8">
-    {% paginate blog.articles by section.settings.number_of_blog_posts %}
+<div class="py-12 bg-gray-50">
+  {% paginate blog.articles by section.settings.number_of_blog_posts %}
+    <h1 class="text-center text-4xl font-extrabold mb-10 text-gray-900">{{ blog.title }}</h1>
 
-        <h1 class="text-center text-3xl">{{ blog.title }}</h1>
-        
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {% for article in blog.articles %}
-                    <div class="w-full py-6 px-3">
-                        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-                            {% if article.image %}
-                                <a href="{{ article.url }}">
-                                    {% assign image = article.image %}
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for article in paginate.items %}
+          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            {% if article.image %}
+              <a href="{{ article.url }}" class="block">
+                {% assign image = article.image %}
+                <img
+                  src="{{ image | image_url: width: 400 }}"
+                  alt="{{ image.alt | escape }}"
+                  width="{{ image.width }}"
+                  height="{{ image.height }}"
+                  class="w-full h-64 object-cover"
+                  loading="lazy"
+                >
+              </a>
+            {% else %}
+              {{ 'image' | placeholder_svg_tag: 'w-full h-64 object-cover bg-gray-200' }}
+            {% endif %}
 
-                                    <img
-                                    class="w-full h-80 object-cover"
-                                    src="{{ image | image_url: width: 400 }}"
-                                    alt="{{ image.alt | escape }}"
-                                    width="{{ image.width }}"
-                                    height="{{ image.height }}"
-                                    >
-                                </a>
-                            {% else %}
-                                {{ 'image' | placeholder_svg_tag: 'w-full h-80 object-cover bg-gray-100' }}
-                            {% endif %}
+            <div class="p-6">
+              <h2 class="text-2xl font-semibold mb-3">
+                <a href="{{ article.url }}" class="text-gray-900 hover:text-blue-600 transition-colors duration-200">
+                  {{ article.title }}
+                </a>
+              </h2>
 
-                            <div class="p-4">
-                                <h1 class="text-xl font-medium my-4">{{ article.title }}</h1>
+              <p class="text-gray-700 leading-relaxed mb-5">
+                {% if article.excerpt.size > 0 %}
+                  {{ article.excerpt | strip_html | truncatewords: 15 }}
+                {% else %}
+                  {{ article.content | strip_html | truncatewords: 15 }}
+                {% endif %}
+              </p>
 
-                                {% if article.excerpt.size > 0 %}
-                                    <p>{{ article.excerpt | strip_html | truncatewords: 15 }}</p>
-                                {% else %}
-                                    <p>{{ article.content | strip_html | truncatewords: 15 }}</p>
-                                {% endif %}
-
-                                <a href="{{ article.url }}" class="font-medium text-blue-600 hover:text-blue-800 my-4 block">{{ section.settings.blog_read_more }}</a>
-                            </div>
-
-                            
-                        </div>
-                        
-                    </div>
-                {% endfor %}
+              <a href="{{ article.url }}" class="inline-block text-blue-600 font-medium hover:text-blue-800 transition-colors duration-200">
+                {{ section.settings.blog_read_more }}
+                <svg class="inline w-4 h-4 ml-1 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
             </div>
-        </div>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
 
-        <div class="max-w-6xl mx-auto">
-            {% render 'pagination', pagination: paginate %}
-        </div>
-    {% endpaginate %}
+    <div class="max-w-6xl mx-auto px-4 mt-12">
+      <nav class="flex justify-center space-x-3 text-gray-700">
+        {% if paginate.previous %}
+          <a href="{{ paginate.previous.url }}" class="px-4 py-2 bg-white rounded-md shadow hover:bg-gray-100 transition">← Previous</a>
+        {% else %}
+          <span class="px-4 py-2 bg-gray-200 rounded-md text-gray-400 cursor-not-allowed">← Previous</span>
+        {% endif %}
+
+        {% for part in paginate.parts %}
+          {% if part.is_link %}
+            <a href="{{ part.url }}" class="px-4 py-2 bg-white rounded-md shadow hover:bg-gray-100 transition">{{ part.title }}</a>
+          {% elsif part.is_gap %}
+            <span class="px-4 py-2">…</span>
+          {% else %}
+            <span aria-current="page" class="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold">{{ part.title }}</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if paginate.next %}
+          <a href="{{ paginate.next.url }}" class="px-4 py-2 bg-white rounded-md shadow hover:bg-gray-100 transition">Next →</a>
+        {% else %}
+          <span class="px-4 py-2 bg-gray-200 rounded-md text-gray-400 cursor-not-allowed">Next →</span>
+        {% endif %}
+      </nav>
+    </div>
+  {% endpaginate %}
 </div>
-
-
-
-{% schema %}
-{
-    "name": "Blog",
-    "settings": [
-        {
-            "type": "text",
-            "id": "blog_read_more",
-            "label": "Read more label",
-            "default": "Read more"
-        },
-        {
-            "type": "range",
-            "id": "number_of_blog_posts",
-            "step": 1,
-            "min": 1,
-            "max": 6,
-            "label": "Blog posts per page",
-            "default": 3
-        }
-    ]
-}
-{% endschema %}

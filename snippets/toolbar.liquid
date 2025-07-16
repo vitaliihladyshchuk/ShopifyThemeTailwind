@@ -1,5 +1,5 @@
 {% comment %}
-Tailwind facets toolbar (без Alpine для filters)
+  Tailwind facets toolbar with responsiveness and Alpine.js interactivity
 {% endcomment %}
 
 {%- liquid
@@ -13,12 +13,20 @@ endif
 -%}
 
 <div
-    id="FacetsToolbarContainer"
+  id="FacetsToolbarContainer"
   x-data="facetsToolbar()"
   class="w-full bg-white rounded shadow p-4"
 >
+  <!-- Мобільна кнопка відкриття/закриття фільтрів -->
+  <button
+    type="button"
+    class="block md:hidden mb-4 px-4 py-2 bg-blue-600 text-white rounded font-semibold"
+    @click="filtersOpen = !filtersOpen"
+    x-text="filtersOpen ? '{{ 'products.facets.hide_filters' | t }}' : '{{ 'products.facets.show_filters' | t }}'"
+  ></button>
+
   <form
-     id="FacetFiltersForm"
+    id="FacetFiltersForm"
     x-ref="facetForm"
     class="space-y-4"
     @submit.prevent="submitFacets()"
@@ -30,15 +38,21 @@ endif
     {%- endif -%}
 
     {% if enable_filtering %}
-      <div id="FacetsWrapperDesktop" class="mb-4">
+      <!-- Фільтри -->
+      <div
+        id="FacetsWrapper"
+        :class="filtersOpen ? 'block' : 'hidden'"
+        class="md:block mb-4"
+      >
         <h2 class="text-lg font-semibold mb-2" id="verticalTitle" tabindex="-1">
           {{ 'products.facets.filter_by_label' | t }}
         </h2>
+
         {% for filter in results.filters %}
           {% if filter.type == 'boolean' or filter.type == 'list' %}
             <details class="mb-2 border rounded" {% if filter.open %}open{% endif %}>
-              <summary class="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-t">
-                <span class="font-medium">{{ filter.label }}</span>
+              <summary class="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-t font-medium">
+                {{ filter.label }}
                 {% if filter.active_values.size > 0 %}
                   <span class="ml-2 text-xs text-gray-500">
                     ({{ 'products.facets.filters_selected.one' | t: count: filter.active_values.size }})
@@ -48,36 +62,34 @@ endif
               <div class="px-4 py-2">
                 <fieldset>
                   <legend class="sr-only">{{ filter.label }}</legend>
-                  <ul class="space-y-1">
+
                   {% if filter.presentation == 'image' %}
                     {% assign show_limit = 12 %}
                   {% else %}
                     {% assign show_limit = 10 %}
                   {% endif %}
+
                   {% if filter.values.size > show_limit %}
                     {% assign show_more = true %}
                   {% else %}
                     {% assign show_more = false %}
                   {% endif %}
+
+                  <ul class="space-y-1">
                     {% for value in filter.values %}
-                      {% if forloop.index0 < show_limit or show_more == false %}
+                      {% if forloop.index0 < show_limit %}
                         <li>
                           <label
                             class="flex items-center space-x-2 cursor-pointer
-                             {% if value.count == 0 %}
-                                {% unless value.active %}opacity-50 pointer-events-none{% endunless %}
-                              {% endif %}
+                              {% if value.count == 0 and value.active == false %}opacity-50 pointer-events-none{% endif %}
+
                               {% if value.active %}font-bold text-blue-600{% endif %}">
                             <input
                               type="checkbox"
                               name="{{ value.param_name }}"
                               value="{{ value.value }}"
                               {% if value.active %}checked{% endif %}
-                              {% if value.count == 0 %}
-                                {% unless value.active %}
-                                  disabled
-                                {% endunless %}
-                              {% endif %}
+                              {% if value.count == 0 and value.active == false %}disabled{% endif %}
                               class="form-checkbox h-4 w-4 text-blue-600"
                             >
                             <span>{{ value.label }}</span>
@@ -87,30 +99,25 @@ endif
                       {% endif %}
                     {% endfor %}
                   </ul>
+
                   {% if show_more %}
-                    <div x-data="{ showMore: false }">
+                    <div x-data="{ showMore: false }" class="mt-2">
                       <template x-if="showMore">
                         <ul class="space-y-1 mt-2">
                           {% for value in filter.values offset:show_limit %}
                             <li>
                               <label
                                 class="flex items-center space-x-2 cursor-pointer
-                                {% if value.count == 0 %}
-                                  {% unless value.active %}
+                                  {% if value.count == 0 and value.active == false %}
                                     opacity-50 pointer-events-none
-                                  {% endunless %}
-                                {% endif %}
-                                {% if value.active %}font-bold text-blue-600{% endif %}">
+                                  {% endif %}
+                                  {% if value.active %}font-bold text-blue-600{% endif %}">
                                 <input
                                   type="checkbox"
                                   name="{{ value.param_name }}"
                                   value="{{ value.value }}"
                                   {% if value.active %}checked{% endif %}
-                                  {% if value.count == 0 %}
-                                    {% unless value.active %}
-                                        disabled
-                                    {% endunless %}
-                                  {% endif %}
+                                  {% if value.count == 0 and value.active == false %}disabled{% endif %}
                                   class="form-checkbox h-4 w-4 text-blue-600"
                                 >
                                 <span>{{ value.label }}</span>
@@ -122,7 +129,7 @@ endif
                       </template>
                       <button
                         type="button"
-                        class="mt-2 text-blue-600 underline text-sm"
+                        class="text-blue-600 underline text-sm"
                         @click="showMore = !showMore"
                         x-text="showMore ? '{{ 'products.facets.show_less' | t }}' : '{{ 'products.facets.show_more' | t }}'">
                         {{ 'products.facets.show_more' | t }}
@@ -134,10 +141,10 @@ endif
             </details>
           {% elsif filter.type == 'price_range' %}
             <details class="mb-2 border rounded">
-              <summary class="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-t">
-                <span>{{ filter.label }}</span>
+              <summary class="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-t font-medium">
+                {{ filter.label }}
               </summary>
-              <div class="px-4 py-2">
+              <div class="px-4 py-2 space-y-2">
                 <div class="flex items-center space-x-2">
                   <input
                     type="number"
@@ -147,7 +154,7 @@ endif
                     class="form-input w-20 border rounded px-2 py-1"
                     placeholder="Min"
                   />
-                  -
+                  <span>-</span>
                   <input
                     type="number"
                     name="filter.v.price.lte"
@@ -159,7 +166,7 @@ endif
                 </div>
                 <a
                   href="{{ filter.url_to_remove }}"
-                  class="text-xs text-red-500 underline mt-2 inline-block"
+                  class="text-xs text-red-500 underline inline-block"
                 >
                   {{- 'products.facets.reset' | t -}}
                 </a>
@@ -168,7 +175,7 @@ endif
           {% endif %}
         {% endfor %}
       </div>
-      <!-- Pills for active filters (horizontal) -->
+
       {% if filter_type == 'horizontal' %}
         <div class="flex flex-wrap gap-2 mb-4">
           {% for filter in results.filters %}
@@ -193,30 +200,28 @@ endif
       <input type="hidden" name="q" value="{{ results.current_vendor }}{{ results.current_type }}">
     {% endif %}
 
-    <!-- Sorting and product count (horizontal) -->
     {% if enable_sorting %}
-      <div class="flex items-center justify-between mt-4">
-        <div>
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between mt-4 space-y-2 md:space-y-0">
+        <div class="w-full md:w-auto">
           <label for="SortBy" class="block text-sm font-medium text-gray-700 mb-1">
             {{ 'products.facets.sort_by_label' | t }}
           </label>
-<select
-  name="sort_by"
-  id="SortBy"
-  class="form-select border rounded px-2 py-1"
->
-  {% for option in results.sort_options %}
-    {% assign option_string = option | join: '||' %}
-    {% assign parts = option_string | split: '||' %}
-    {% assign value = parts[0] %}
-    {% assign label = parts[1] %}
-    <option value="{{ value | escape }}"
-      {% if value == sort_by or value == results.default_sort_by %}selected{% endif %}>
-      {{ label }}
-    </option>
-  {% endfor %}
-</select>
-
+          <select
+            name="sort_by"
+            id="SortBy"
+            class="form-select border rounded px-2 py-1 w-full md:w-auto"
+          >
+            {% for option in results.sort_options %}
+              {% assign option_string = option | join: '||' %}
+              {% assign parts = option_string | split: '||' %}
+              {% assign value = parts[0] %}
+              {% assign label = parts[1] %}
+              <option value="{{ value | escape }}"
+                {% if value == sort_by or value == results.default_sort_by %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
         <div class="text-sm text-gray-600">
           {{ results.products_count }} / {{ results.all_products_count }}
@@ -229,6 +234,7 @@ endif
 <script>
 window.facetsToolbar = function facetsToolbar() {
   return {
+    filtersOpen: false,
     loading: false,
     submitFacets(event) {
       if (event) event.preventDefault();
@@ -237,7 +243,6 @@ window.facetsToolbar = function facetsToolbar() {
       const formData = new FormData(form);
       const params = new URLSearchParams(formData);
 
-      // Витягуємо section_id з DOM (з data-section-id на гріді)
       const sectionId = document.querySelector('#ProductGridContainer')?.dataset.sectionId;
       if (sectionId) params.set('section_id', sectionId);
 
@@ -246,7 +251,6 @@ window.facetsToolbar = function facetsToolbar() {
       fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.text())
         .then(html => {
-          // Замінюємо весь контейнер секції
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           const newContainer = doc.querySelector('#CollectionAjaxContainer');
@@ -254,6 +258,7 @@ window.facetsToolbar = function facetsToolbar() {
           if (newContainer && oldContainer && oldContainer.parentNode) {
             oldContainer.parentNode.replaceChild(newContainer, oldContainer);
           }
+          this.filtersOpen = false;
         })
         .finally(() => this.loading = false);
     }

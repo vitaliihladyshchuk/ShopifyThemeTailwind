@@ -1,4 +1,23 @@
-<div class="h-full flex items-center justify-center py-12 px-6 md:px-4 lg:px-8">
+<div class="h-full flex items-center justify-center py-12 px-6 md:px-4 lg:px-8" 
+     x-data="{
+        firstName: '', 
+        lastName: '', 
+        birthday: '', 
+        email: '', 
+        password: '', 
+        showPassword: false,
+        emailValid() {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(this.email);
+        },
+        get canSubmit() {
+            return this.firstName.trim() !== '' &&
+                   this.lastName.trim() !== '' &&
+                   this.emailValid() &&
+                   this.password.length >= 6;
+        }
+    }"
+>
     <div class="max-w-md w-full space-y-8">
         <div>
             <h1 class="text-center text-3xl font-bold mt-6">Register an account</h1>
@@ -18,8 +37,9 @@
                         name="customer[first_name]"
                         id="first_name"
                         autocomplete="given-name"
-                        class="relative block w-full px-3 py-2 border"
                         placeholder="First name"
+                        class="relative block w-full px-3 py-2 border"
+                        x-model="firstName"
                     >
                 </div>
 
@@ -29,8 +49,9 @@
                         name="customer[last_name]"
                         id="last_name"
                         autocomplete="family-name"
-                        class="relative block w-full px-3 py-2 border"
                         placeholder="Last name"
+                        class="relative block w-full px-3 py-2 border"
+                        x-model="lastName"
                     >
                 </div>
 
@@ -40,34 +61,47 @@
                         name="customer[note][Birthday]"
                         id="birthday"
                         class="relative block w-full px-3 py-2 border"
+                        x-model="birthday"
                     >
                 </div>
 
-                <div class="my-2">
+                <div class="my-2 relative">
                     <label for="email_address" class="sr-only">Email address</label>
                     <input type="email"
                         name="customer[email]"
                         id="email_address"
                         autocomplete="email"
-                        class="relative block w-full px-3 py-2 border"
                         placeholder="Email address"
+                        class="relative block w-full px-3 py-2 border"
+                        x-model="email"
                     >
+                    <p x-show="email && !emailValid()" class="text-red-600 text-xs mt-1">Invalid email format</p>
                 </div>
 
-                
-                <div class="my-2">
+                <div class="my-2 relative">
                     <label for="password" class="sr-only">Password</label>
-                    <input type="password"
+                    <input :type="showPassword ? 'text' : 'password'"
                         name="customer[password]"
                         id="password"
                         autocomplete="new-password"
+                        placeholder="Password (min 6 chars)"
                         class="relative block w-full px-3 py-2 border"
-                        placeholder="Password"
+                        x-model="password"
                     >
+                    <button type="button" 
+                        class="absolute right-2 top-2 text-gray-600 hover:text-gray-900 select-none"
+                        @click="showPassword = !showPassword" 
+                        tabindex="-1"
+                    >
+                        <span x-text="showPassword ? 'Hide' : 'Show'"></span>
+                    </button>
                 </div>
-                
+
                 <div>
-                    <button type="submit" class="relative w-full py-2 px-4 text-sm font-medium text-white bg-gray-600 hover:bg-gray-900">
+                    <button type="submit" 
+                        class="relative w-full py-2 px-4 text-sm font-medium text-white bg-gray-600 hover:bg-gray-900 disabled:opacity-50"
+                        :disabled="!canSubmit"
+                    >
                         Create account
                     </button>
                 </div>

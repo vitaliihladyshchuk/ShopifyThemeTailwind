@@ -1,60 +1,62 @@
 <script>
   window.initialCart = {{ cart | json }};
 </script>
+<div x-data x-init="$store.cart.initCart()">
+ 
 
-<!-- Drawer -->
-<div 
->
   <!-- Overlay -->
   <div 
-    x-show="openDrawer"
+    x-show="$store.cart.openDrawer"
     x-transition.opacity
-    @click="openDrawer = false"
-    class="fixed inset-0 bg-black/50"
+    @click="$store.cart.openDrawer = false"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50"
+    style="display: none;"
   ></div>
 
-  <!-- Cart Drawer -->
+  <!-- Drawer -->
   <div 
-    x-show="openDrawer"
+    x-show="$store.cart.openDrawer"
     x-transition:enter="transition transform ease-out duration-300"
     x-transition:enter-start="translate-x-full"
     x-transition:enter-end="translate-x-0"
     x-transition:leave="transition transform ease-in duration-300"
     x-transition:leave-start="translate-x-0"
     x-transition:leave-end="translate-x-full"
-    class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl p-6 overflow-auto"
-    @click.away="openDrawer = false"
+    @click.away="$store.cart.openDrawer = false"
+    class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl p-6 overflow-auto z-50"
+    style="display: none;"
   >
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-semibold">Your cart</h2>
-      <button @click="openDrawer = false" class="text-gray-600 hover:text-black">
+      <button @click="$store.cart.openDrawer = false" class="text-gray-600 hover:text-black" aria-label="Close cart">
         {% render 'icon-close' %}
       </button>
     </div>
 
-    <template x-if="cartItems.length === 0">
+    <template x-if="$store.cart.cartItems.length === 0">
       <div class="p-6 text-center text-gray-500">Your cart is empty</div>
     </template>
 
-    <template x-if="cartItems.length > 0">
+    <template x-if="$store.cart.cartItems.length > 0">
       <ul class="divide-y divide-gray-200">
-        <template x-for="(item, index) in cartItems" :key="item.key">
+        <template x-for="(item, index) in $store.cart.cartItems" :key="item.key">
           <li class="flex px-4 py-4 space-x-4">
             <div class="w-16 h-16 bg-gray-100 flex-shrink-0">
               <img
-                :src="getImageUrl(item.image)"
+                :src="item.image ? item.image.replace(/(\.[a-z]+)$/, '_100x100$1') : ''"
                 :alt="item.product_title"
                 class="w-full h-full object-cover"
                 width="300"
                 height="300"
+                loading="lazy"
               />
             </div>
             <div class="flex-1">
               <h3 class="text-sm font-medium text-gray-900" x-text="item.product_title"></h3>
               <p class="text-sm text-gray-500" x-show="item.variant_title !== 'Default Title'" x-text="item.variant_title"></p>
-              <p class="text-sm text-gray-900 mt-1" x-text="`${item.quantity} × ${formatMoney(item.line_price)}`"></p>
+              <p class="text-sm text-gray-900 mt-1" x-text="`${item.quantity} × ${(item.line_price / 100).toFixed(2)} {{ cart.currency.symbol }}`"></p>
             </div>
-            <button @click="removeFromCart(item.key)" class="text-gray-400 hover:text-red-500">
+            <button @click="$store.cart.removeFromCart(item.key)" class="text-gray-400 hover:text-red-500" aria-label="Remove item">
               {% render 'icon-close' %}
             </button>
           </li>
@@ -62,10 +64,10 @@
       </ul>
     </template>
 
-    <div class="px-4 py-4 border-t mt-4" x-show="cartItems.length > 0">
+    <div class="px-4 py-4 border-t mt-4" x-show="$store.cart.cartItems.length > 0">
       <div class="flex justify-between text-base font-medium text-gray-900">
         <p>Total</p>
-        <p x-text="formatMoney(totalPrice)"></p>
+        <p x-text="($store.cart.totalPrice / 100).toFixed(2) + ' {{ cart.currency.symbol }}'"></p>
       </div>
       <div class="mt-4 space-y-2">
         <form method="post" action="{{ routes.checkout_url }}">
@@ -85,20 +87,23 @@
 </div>
 
 <script>
-function cartDrawer() {
-  return {
+document.addEventListener('alpine:init', () => {
+  Alpine.store('cart', {
     openDrawer: false,
     cartItems: [],
     totalPrice: 0,
-    cartItemsCount: '',
+    cartItemsCount: 0,
 
     initCart() {
       this.cartItems = window.initialCart.items || [];
       this.totalPrice = window.initialCart.total_price || 0;
       this.cartItemsCount = window.initialCart.item_count || 0;
 
-      window.addEventListener('cart-updated', () => {
-        this.refreshCart();
+      window.addEventListener('cart-updated', (event) => {
+        const data = event.detail;
+        this.cartItems = data.items;
+        this.totalPrice = data.total_price;
+        this.cartItemsCount = data.item_count;
       });
     },
 
@@ -106,18 +111,10 @@ function cartDrawer() {
       fetch('/cart.js')
         .then(res => res.json())
         .then(data => {
-          this.cartItemsCount = data.item_count;
           this.cartItems = data.items;
           this.totalPrice = data.total_price;
+          this.cartItemsCount = data.item_count;
         });
-    },
-
-    getImageUrl(img) {
-      return img ? `${img.replace(/(\.[a-z]+)$/, '_100x100$1')}` : '';
-    },
-
-    formatMoney(cents) {
-      return (cents / 100).toFixed(2) + ' {{ cart.currency.symbol }}';
     },
 
     removeFromCart(itemKey) {
@@ -130,10 +127,14 @@ function cartDrawer() {
       .then(data => {
         this.cartItems = data.items;
         this.totalPrice = data.total_price;
+        this.cartItemsCount = data.item_count;
         window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+      })
+      .catch(() => {
+        alert('Failed to remove item from cart');
       });
     }
-  }
-}
-</script>
+  });
+});
 
+</script>

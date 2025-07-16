@@ -184,7 +184,7 @@
       "search_for": "Search for “{{ terms }}”",
       "suggestions": "Suggestions",
       "pages": "Pages"
-    },
+    }
   },
   "accessibility": {
     "skip_to_text": "Skip to content",
