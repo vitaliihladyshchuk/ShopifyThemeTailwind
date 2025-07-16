@@ -58,39 +58,49 @@
 document.addEventListener('DOMContentLoaded', function() {
   document.body.addEventListener('click', function(e) {
     const link = e.target.closest('.pagination-link');
-    if (link) {
-      e.preventDefault();
-      // Знайти Alpine-інстанс і поставити loading=true
-      if (link.closest('[x-data]') && window.Alpine) {
-        window.Alpine.$data(link.closest('[x-data]')).loading = true;
-      }
-      fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          // Замінити grid товарів
-          const newGrid = doc.querySelector('#ProductGridContainer');
-          const oldGrid = document.querySelector('#ProductGridContainer');
-          if (newGrid && oldGrid) {
-            oldGrid.innerHTML = newGrid.innerHTML;
-          }
-          // Замінити пагінацію
-          const newPagination = doc.querySelector('nav[role="navigation"]');
-          const oldPagination = document.querySelector('nav[role="navigation"]');
-          if (newPagination && oldPagination) {
-            oldPagination.innerHTML = newPagination.innerHTML;
-          }
-          // Прокрутити до grid (опціонально)
-          if (oldGrid) oldGrid.scrollIntoView({ behavior: 'smooth' });
-        })
-        .finally(() => {
-          // Вимкнути loading-стан
-          if (link.closest('[x-data]') && window.Alpine) {
-            window.Alpine.$data(link.closest('[x-data]')).loading = false;
-          }
-        });
+    if (!link) return;
+
+    e.preventDefault();
+
+    const alpineRoot = link.closest('[x-data]');
+    if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+      alpineRoot.__x.$data.loading = true;
     }
+
+    fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const newGrid = doc.querySelector('#ProductGridContainer');
+        const oldGrid = document.querySelector('#ProductGridContainer');
+        if (newGrid && oldGrid) {
+          oldGrid.replaceWith(newGrid);
+        }
+
+        const newPagination = doc.querySelector('nav[role="navigation"]');
+        const oldPagination = document.querySelector('nav[role="navigation"]');
+        if (newPagination && oldPagination) {
+          oldPagination.replaceWith(newPagination);
+        }
+
+        window.history.pushState({}, '', link.href);
+
+        document.querySelector('#ProductGridContainer')?.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(() => {
+        console.error('Помилка завантаження сторінки пагінації');
+      })
+      .finally(() => {
+        if (alpineRoot && alpineRoot.__x && alpineRoot.__x.$data) {
+          alpineRoot.__x.$data.loading = false;
+        }
+      });
+  });
+
+  window.addEventListener('popstate', () => {
+    location.reload();
   });
 });
 </script>

@@ -1,32 +1,64 @@
 {% comment %}
-  Renders a swatch component.
-  Accepts:
-  - swatch: {Object} a swatch object
-  - shape: {String} swatch shape. Accepts 'square', defaults to circle.
-
-  Usage:
-  {% render 'swatch',
-    swatch: value.swatch
-    shape: 'square'
-  %}
+  Інтерактивний свотч з Alpine.js + Tailwind
+  Параметри:
+  - swatch: обʼєкт свотча (swatch.image або swatch.color)
+  - shape: 'square' або circle (за замовчуванням)
+  - name: імʼя групи input (radio)
+  - id: унікальний id
+  - value: значення input
+  - checked: чи вибраний свотч (true/false)
+  - disabled: чи заблокований свотч (true/false)
 {% endcomment %}
 
-{%- liquid
-  assign swatch_value = null
-  if swatch.image
-    assign image_url = swatch.image | image_url: width: 50
-    assign swatch_value = 'url(' | append: image_url | append: ')'
-    assign swatch_focal_point = swatch.image.presentation.focal_point
-  elsif swatch.color
-    assign swatch_value = 'rgb(' | append: swatch.color.rgb | append: ')'
-  endif
--%}
-
-<span
-  {% if swatch_value %}
-    class="swatch{% if shape == 'square' %} swatch--square{% endif %}"
-    style="--swatch--background: {{ swatch_value }};{% if swatch_focal_point %} --swatch-focal-point: {{ swatch_focal_point }};{% endif %}"
-  {% else %}
-    class="swatch swatch--unavailable{% if shape == 'square' %} swatch--square{% endif %}"
-  {% endif %}
-></span>
+<div
+  x-data="{
+    selected: {{ checked | default: false | json }},
+    disabled: {{ disabled | default: false | json }},
+    toggle() {
+      if (!this.disabled) {
+        this.selected = true;
+        $dispatch('swatch-selected', { value: '{{ value }}' });
+      }
+    }
+  }"
+  :class="{
+    'opacity-50 cursor-not-allowed': disabled,
+    'ring-2 ring-blue-500': selected && !disabled,
+    'cursor-pointer': !disabled
+  }"
+  class="inline-block"
+  @click="toggle"
+  role="radio"
+  :aria-checked="selected.toString()"
+  tabindex="0"
+  @keydown.space.prevent="toggle"
+  @keydown.enter.prevent="toggle"
+>
+  <input
+    type="radio"
+    :checked="selected"
+    name="{{ name }}"
+    id="{{ id }}"
+    value="{{ value }}"
+    class="hidden"
+    :disabled="disabled"
+  >
+  <span
+    class="inline-block border border-gray-300 transition-transform duration-300 ease-in-out
+      {% if shape == 'square' %}
+        rounded-md
+      {% else %}
+        rounded-full
+      {% endif %}
+      hover:scale-110"
+    style="
+      background-image: {% if swatch.image %}url('{{ swatch.image | image_url: width: 50 }}'){% elsif swatch.color %}rgb({{ swatch.color.rgb }}){% else %}none{% endif %};
+      background-position: center;
+      background-size: cover;
+      width: 2rem;
+      height: 2rem;
+    "
+  >
+    <span class="sr-only">{{ value }}</span>
+  </span>
+</div>

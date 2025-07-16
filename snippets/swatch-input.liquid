@@ -1,20 +1,20 @@
 {% comment %}
-  Renders a swatch input component.
-  Accepts:
-  - id: {String} unique input id
-  - type: {String} input type. Accepts 'radio' or 'checkbox', defaults to 'radio' (optional)
-  - name: {String} input name,
-  - value: {ProductOptionValueDrop} input value
-  - swatch: {SwatchDrop} the swatch drop
-  - product_form_id: {String} id of the form associted with the input
-  - checked: {Boolean} default checked status
-  - disabled: {Boolean} default disabled status (optional)
-  - visually_disabled: {Boolean} style the swatch as disabled, but leave the input enabled (optional)
-  - shape: {String} swatch shape. Accepts 'square', defaults to circle (optional)
-  - help_text: {String} additional content to render inside the label (optional)
-  - additional_props: {String} (optional) additional properties to attach to the input
+  Компонент свотча (swatch input).
+  Параметри:
+  - id: унікальний id для input
+  - type: тип input ('radio' або 'checkbox', за замовчуванням 'radio')
+  - name: ім'я input
+  - value: значення input
+  - swatch: обʼєкт swatch (для візуалізації кольору або зображення)
+  - product_form_id: id форми, з якою повʼязаний input
+  - checked: чи вибраний input за замовчуванням (true/false)
+  - disabled: чи вимкнений input (true/false)
+  - visually_disabled: стиль як disabled, але input активний
+  - shape: форма свотча ('square' або circle за замовчуванням)
+  - help_text: додатковий текст поруч зі свотчем (опційно)
+  - additional_props: додаткові атрибути для input (опційно)
 
-  Usage:
+  Приклад використання:
    {% render 'swatch-input',
       id: input_id,
       name: input_name,
@@ -32,15 +32,9 @@
   value="{{ value }}"
   form="{{ product_form_id }}"
   class="swatch-input__input{% if visually_disabled %} visually-disabled{% endif %}"
-  {% if checked %}
-    checked
-  {% endif %}
-  {% if disabled %}
-    disabled
-  {% endif %}
-  {% if additional_props %}
-    {{ additional_props }}
-  {% endif %}
+  {% if checked %}checked{% endif %}
+  {% if disabled %}disabled{% endif %}
+  {% if additional_props %}{{ additional_props }}{% endif %}
 >
 <label
   for="{{ id }}"

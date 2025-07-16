@@ -16,15 +16,15 @@
                                     {% endif %}
 
                                     {% assign image = collection_image %}
-                                    {% if image %}
-                                    <img
-                                        class="w-full h-full object-cover transition duration-1000 ease-in-out transform hover:scale-105"
-                                        src="{{ image | image_url: width: 400 }}"
-                                        alt="{{ collection.title | escape }}"
-                                        width="{{ image.width }}"
-                                        height="{{ image.height }}"
-                                    >
-                                    {% endif %}
+{% if image %}
+  <img
+    class="w-full h-full object-cover transition duration-1000 ease-in-out transform hover:scale-105"
+    src="{{ image | image_url: width: 400 }}"
+    alt="{{ collection.title | escape }}"
+    width="{{ image.width }}"
+    height="{{ image.height }}"
+  >
+{% endif %}
 
                                 </div>
                             </a>
