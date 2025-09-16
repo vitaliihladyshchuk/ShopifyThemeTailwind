@@ -1,3 +1,4 @@
+{% render 'rapid-search-results-template-v2' %}
 {% paginate collection.products by section.settings.number_of_products_per_page %}
   {% if request.xhr %}
     <aside class="pr-12">
