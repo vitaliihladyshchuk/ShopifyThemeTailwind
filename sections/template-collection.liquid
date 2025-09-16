@@ -1,3 +1,4 @@
+{% render 'rapid-search-results-template-v2' %}
 {% paginate collection.products by section.settings.number_of_products_per_page %}
   <div x-data="{ view: 'grid' }" class="px-4 py-8 max-w-7xl mx-auto">
 
